@@ -26,7 +26,7 @@ def load_data():
     
     # Navigate to the data folder (adjust path based on your repo structure)
     # Option 1: If data.csv is in a 'data' folder at the root
-    file_path = os.path.join(current_dir, '..', '..', 'data', 'data.csv')
+    file_path = os.path.join('Spotify/data.csv')
     
     # Option 2: If data.csv is in the same directory as this script
     # file_path = os.path.join(current_dir, 'data.csv')
