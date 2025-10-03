@@ -21,13 +21,27 @@ st.subheader("Spotify Music Recommendation System")
 # ===============================
 @st.cache_data
 def load_data():
-    # Get current directory of this script
-    current_dir = os.path.dirname(__file__)
-    # Go one level up and into "data" folder
-    file_path = os.path.join(current_dir, "..", "data", "data.csv")
-    return pd.read_csv(file_path)
+    # Get the directory of the current script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Navigate to the data folder (adjust path based on your repo structure)
+    # Option 1: If data.csv is in a 'data' folder at the root
+    file_path = os.path.join(current_dir, '..', '..', 'data', 'data.csv')
+    
+    # Option 2: If data.csv is in the same directory as this script
+    # file_path = os.path.join(current_dir, 'data.csv')
+    
+    # Option 3: If data.csv is one level up in a data folder
+    # file_path = os.path.join(current_dir, '..', 'data', 'data.csv')
+    
+    try:
+        return pd.read_csv(file_path)
+    except FileNotFoundError:
+        st.error(f"❌ Could not find data.csv at: {file_path}")
+        st.info("Please ensure data.csv is in your repository at the correct location.")
+        st.stop()
 
-# Load dataset
+
 data = load_data()
 
 number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 
@@ -40,8 +54,10 @@ scaler.fit(data[number_cols])
 # ===============================
 # SPOTIFY API CONFIG
 # ===============================
-os.environ["SPOTIPY_CLIENT_ID"] = "fdc9a50a91db41a3a25dcb6c76ebc29d"
-os.environ["SPOTIPY_CLIENT_SECRET"] = "9294659f5123413d94321a6506f68ffe"
+# IMPORTANT: Use Streamlit Secrets for production!
+# For now, using environment variables
+os.environ["SPOTIPY_CLIENT_ID"] = st.secrets.get("SPOTIPY_CLIENT_ID", "fdc9a50a91db41a3a25dcb6c76ebc29d")
+os.environ["SPOTIPY_CLIENT_SECRET"] = st.secrets.get("SPOTIPY_CLIENT_SECRET", "9294659f5123413d94321a6506f68ffe")
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_id=os.environ["SPOTIPY_CLIENT_ID"],
@@ -125,12 +141,4 @@ if submit:
         else:
             st.success(f"Found {len(recs)} recommendations!")
             st.dataframe(recs)
-            fig = px.bar(recs, x="name", y="popularity", color="artists",
-                         title="Recommended Songs Popularity", labels={"name":"Song"})
-            st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("Please enter at least one song.")
-
-st.markdown("---")
-st.write("Thank you for using the Spotify Music Recommendation System!")
-st.caption("Built with ❤️ using Spotify API + Streamlit")
+            fig = px.b
