@@ -21,9 +21,13 @@ st.subheader("Spotify Music Recommendation System")
 # ===============================
 @st.cache_data
 def load_data():
-    return pd.read_csv(r"C:\\Users\\Nullvoid\Desktop\\Music recommendation system\\Spotify\\data.csv")
+    # Get current directory of this script
+    current_dir = os.path.dirname(__file__)
+    # Go one level up and into "data" folder
+    file_path = os.path.join(current_dir, "..", "data", "data.csv")
+    return pd.read_csv(file_path)
 
-
+# Load dataset
 data = load_data()
 
 number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 
