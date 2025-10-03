@@ -104,14 +104,20 @@ def get_mean_vector(song_list, data):
 def recommend_songs(song_list, data, n_songs=10):
     song_center = get_mean_vector(song_list, data)
     if song_center is None:
-        return []
+        return None
     scaled_data = scaler.transform(data[number_cols])
     scaled_song_center = scaler.transform(song_center.reshape(1, -1))
     distances = cdist(scaled_song_center, scaled_data, 'cosine')
     index = list(np.argsort(distances)[:, :n_songs][0])
-    rec_songs = data.iloc[index]
+    rec_songs = data.iloc[index].copy()
     rec_songs = rec_songs[~rec_songs['name'].isin([s['name'] for s in song_list])]
-    return rec_songs[['name', 'year', 'artists', 'popularity']]
+    
+    # Ensure all required columns exist
+    required_cols = ['name', 'year', 'popularity']
+    if 'artists' not in rec_songs.columns:
+        rec_songs['artists'] = 'Unknown'
+    
+    return rec_songs[required_cols + ['artists']]
 
 # ===============================
 # STREAMLIT UI
@@ -135,10 +141,34 @@ if submit:
     if song3: song_list.append({'name': song3, 'year': year3})
 
     if song_list:
-        recs = recommend_songs(song_list, data)
-        if recs is None or recs.empty:
+        with st.spinner("🎵 Finding recommendations..."):
+            recs = recommend_songs(song_list, data)
+        
+        if recs is None or len(recs) == 0:
             st.warning("❌ No recommendations found. Try different songs.")
         else:
-            st.success(f"Found {len(recs)} recommendations!")
-            st.dataframe(recs)
-            fig = px.b
+            st.success(f"✅ Found {len(recs)} recommendations!")
+            st.dataframe(recs, use_container_width=True)
+            
+            # Create visualization with error handling
+            try:
+                if 'popularity' in recs.columns and not recs.empty:
+                    fig = px.bar(
+                        recs, 
+                        x="name", 
+                        y="popularity", 
+                        color="artists",
+                        title="Recommended Songs by Popularity", 
+                        labels={"name": "Song", "popularity": "Popularity"},
+                        height=400
+                    )
+                    fig.update_layout(xaxis_tickangle=-45)
+                    st.plotly_chart(fig, use_container_width=True)
+            except Exception as e:
+                st.error(f"Could not create chart: {str(e)}")
+    else:
+        st.warning("⚠️ Please enter at least one song.")
+
+st.markdown("---")
+st.write("Thank you for using the Spotify Music Recommendation System!")
+st.caption("Built with ❤️ using Spotify API + Streamlit")
