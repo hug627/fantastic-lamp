@@ -254,8 +254,8 @@ scaler.fit(data[NUMBER_COLS])
 # ===============================
 @st.cache_resource
 def get_spotify_client():
-    client_id     = st.secrets.get("SPOTIPY_CLIENT_ID",     "fdc9a50a91db41a3a25dcb6c76ebc29d")
-    client_secret = st.secrets.get("SPOTIPY_CLIENT_SECRET", "9294659f5123413d94321a6506f68ffe")
+    client_id     = st.secrets.get("SPOTIPY_CLIENT_ID",     "fa3135c299f74bde99e72e316ee903ab")
+    client_secret = st.secrets.get("SPOTIPY_CLIENT_SECRET", "8573b6b646a742a1954387e3589f129e")
     return spotipy.Spotify(auth_manager=SpotifyClientCredentials(
         client_id=client_id,
         client_secret=client_secret
